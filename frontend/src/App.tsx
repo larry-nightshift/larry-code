@@ -6,8 +6,10 @@ import { TasksList } from './components/TasksList';
 import { WeatherWidget } from './components/WeatherWidget';
 import { UpcomingWidget } from './components/UpcomingWidget';
 import { TimerWidget } from './components/TimerWidget';
+import RecipesList from './components/recipes/RecipesList';
+import GroceryListsPage from './components/grocery/GroceryListsPage';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery';
 
 function App() {
   const [currentFeature, setCurrentFeature] = useState<Feature>('dashboard');
@@ -34,6 +36,8 @@ function App() {
       {currentFeature === 'focus' && <FocusCard />}
       {currentFeature === 'notes' && <NotesList />}
       {currentFeature === 'tasks' && <TasksList />}
+      {currentFeature === 'recipes' && <RecipesList />}
+      {currentFeature === 'grocery' && <GroceryListsPage />}
     </Layout>
   );
 }

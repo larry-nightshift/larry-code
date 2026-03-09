@@ -12,6 +12,8 @@ INSTALLED_APPS = [
     'api',
     'weather',
     'journalapp',
+    'recipes',
+    'grocery',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -14,4 +14,6 @@ router.register(r'weather', WeatherViewSet, basename='weather')
 urlpatterns = [
     path('', include(router.urls)),
     path('journalapp/', include('journalapp.urls')),
+    path('recipes/', include('recipes.urls')),
+    path('grocery/', include('grocery.urls')),
 ]

@@ -119,3 +119,86 @@ export const upcomingAPI = {
       method: 'DELETE',
     }),
 };
+
+// Recipe types
+export interface Ingredient {
+  id?: string;
+  name: string;
+  amount: string;
+  unit: string;
+  note?: string;
+}
+
+export interface Recipe {
+  id?: string;
+  title: string;
+  description?: string;
+  servings: number;
+  directions?: string[];
+  ingredients?: Ingredient[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GroceryItem {
+  id: string;
+  name: string;
+  amount: string;
+  unit: string;
+  source_recipes?: string[];
+}
+
+export interface GroceryList {
+  id: string;
+  title: string;
+  recipe_ids?: string[];
+  recipes?: Recipe[];
+  items?: GroceryItem[];
+  date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const recipesAPI = {
+  list: () => request('/recipes/'),
+  create: (data: Recipe) =>
+    request('/recipes/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  get: (id: string) => request(`/recipes/${id}/`),
+  update: (id: string, data: Partial<Recipe>) =>
+    request(`/recipes/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request(`/recipes/${id}/`, {
+      method: 'DELETE',
+    }),
+  search: (query: string) => request(`/recipes/search/?q=${encodeURIComponent(query)}`),
+};
+
+export const groceryAPI = {
+  list: () => request('/grocery/lists/'),
+  create: (data: { title: string; recipe_ids: string[]; date?: string }) =>
+    request('/grocery/lists/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  get: (id: string) => request(`/grocery/lists/${id}/`),
+  update: (id: string, data: Partial<GroceryList>) =>
+    request(`/grocery/lists/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request(`/grocery/lists/${id}/`, {
+      method: 'DELETE',
+    }),
+  export: (id: string) => `${API_BASE}/grocery/lists/${id}/export/`,
+  regenerate: (id: string) =>
+    request(`/grocery/lists/${id}/regenerate/`, {
+      method: 'POST',
+    }),
+};
