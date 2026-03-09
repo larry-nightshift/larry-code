@@ -10,6 +10,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api',
+    'weather',
     'journalapp',
     'django.contrib.admin',
     'django.contrib.auth',

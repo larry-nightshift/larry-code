@@ -1,12 +1,15 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils.timezone import now
+from django.contrib.auth import get_user_model, authenticate, login, logout
 from datetime import date
 
 from .models import TodayFocus, Note, Task, UpcomingItem
 from .serializers import TodayFocusSerializer, NoteSerializer, TaskSerializer, UpcomingItemSerializer
+
+User = get_user_model()
 
 
 class TodayFocusViewSet(viewsets.ModelViewSet):
@@ -79,3 +82,53 @@ class UpcomingItemViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class AuthViewSet(viewsets.ViewSet):
+    """Authentication endpoints for login, logout, and user info."""
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def login(self, request):
+        """Login user and create session."""
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response(
+                {'error': 'username and password required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return Response(
+                {'error': 'Invalid credentials'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        login(request, user)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        })
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def logout(self, request):
+        """Logout user and destroy session."""
+        logout(request)
+        return Response({'message': 'Logged out successfully'})
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Get current user info."""
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        })
