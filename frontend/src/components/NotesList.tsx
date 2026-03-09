@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { notesAPI } from '../lib/api';
 import type { Note } from '../lib/api';
+import { Button, Card, CardHeader, Input, Textarea, Badge, Alert } from './ui';
 
 export function NotesList() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -79,48 +80,52 @@ export function NotesList() {
   const unpinnedNotes = activeNotes.filter((n) => !n.pinned);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Notes</h2>
+    <Card variant="gradient" padding="md" className="animate-fade-in">
+      <CardHeader title="Notes" />
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <Alert variant="danger" dismissible onDismiss={() => setError(null)} className="mb-2">
           {error}
-        </div>
+        </Alert>
       )}
 
-      <div className="mb-6 p-4 border border-gray-300 rounded-lg">
-        <input
-          type="text"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          placeholder="Note title (optional)"
-          className="w-full p-2 border border-gray-300 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <textarea
-          value={newBody}
-          onChange={(e) => setNewBody(e.target.value)}
-          placeholder="Note content"
-          className="w-full p-2 border border-gray-300 rounded mb-2 h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleCreate}
-          disabled={loading || !newBody.trim()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          Create Note
-        </button>
-      </div>
+      {/* Add note form */}
+      <Card variant="outlined" padding="sm" className="mb-3">
+        <div className="space-y-1.5">
+          <Input
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="Note title (optional)"
+          />
+          <Textarea
+            value={newBody}
+            onChange={(e) => setNewBody(e.target.value)}
+            placeholder="Note content"
+            rows={2}
+          />
+          <Button
+            onClick={handleCreate}
+            disabled={loading || !newBody.trim()}
+            size="sm"
+            fullWidth
+          >
+            Create Note
+          </Button>
+        </div>
+      </Card>
 
       {loading && notes.length === 0 ? (
-        <div className="text-center text-gray-400">Loading notes...</div>
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin h-6 w-6 border-2 border-primary-400 border-t-transparent rounded-full" />
+        </div>
       ) : (
-        <div>
+        <div className="space-y-3">
           {pinnedNotes.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
+            <div>
+              <h3 className="text-caption font-semibold text-surface-400 uppercase tracking-wider mb-1.5">
                 Pinned
               </h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-1.5">
                 {pinnedNotes.map((note) => (
                   <NoteItem
                     key={note.id}
@@ -136,10 +141,10 @@ export function NotesList() {
 
           {unpinnedNotes.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
+              <h3 className="text-caption font-semibold text-surface-400 uppercase tracking-wider mb-1.5">
                 Notes
               </h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-1.5">
                 {unpinnedNotes.map((note) => (
                   <NoteItem
                     key={note.id}
@@ -154,13 +159,13 @@ export function NotesList() {
           )}
 
           {activeNotes.length === 0 && (
-            <p className="text-center text-gray-400">
+            <p className="text-center text-surface-500 text-caption py-4">
               No notes yet. Create one above!
             </p>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -176,33 +181,35 @@ function NoteItem({
   onDelete: (id: number) => void;
 }) {
   return (
-    <div className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-      {note.title && <h4 className="font-semibold text-gray-900">{note.title}</h4>}
-      <p className="text-gray-700 text-sm">{note.body}</p>
-      <div className="flex gap-2 mt-2">
-        <button
-          onClick={() => onPin(note)}
-          className={`px-2 py-1 text-xs rounded ${
-            note.pinned
-              ? 'bg-yellow-200 text-yellow-800'
-              : 'bg-gray-200 text-gray-700'
-          }`}
-        >
-          {note.pinned ? '📌 Pinned' : 'Pin'}
-        </button>
-        <button
-          onClick={() => onArchive(note)}
-          className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded"
-        >
-          Archive
-        </button>
-        <button
-          onClick={() => onDelete(note.id)}
-          className="px-2 py-1 text-xs bg-red-200 text-red-700 rounded"
-        >
-          Delete
-        </button>
+    <Card variant="outlined" padding="sm" hoverable className="group">
+      <div className="flex items-start justify-between gap-1.5">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 mb-0.5">
+            {note.title && (
+              <h4 className="font-medium text-body text-surface-100 truncate">{note.title}</h4>
+            )}
+            {note.pinned && (
+              <Badge variant="warning" size="sm">Pinned</Badge>
+            )}
+          </div>
+          <p className="text-caption text-surface-300 line-clamp-3">{note.body}</p>
+        </div>
       </div>
-    </div>
+      <div className="flex gap-0.5 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant={note.pinned ? 'outline' : 'ghost'}
+          size="sm"
+          onClick={() => onPin(note)}
+        >
+          {note.pinned ? 'Unpin' : 'Pin'}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => onArchive(note)}>
+          Archive
+        </Button>
+        <Button variant="danger" size="sm" onClick={() => onDelete(note.id)}>
+          Delete
+        </Button>
+      </div>
+    </Card>
   );
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Plus, Trash2, Calendar, Clock } from 'lucide-react';
 import { upcomingAPI } from '../lib/api';
 import type { UpcomingItem } from '../lib/api';
+import { Card, CardHeader, Button, Input, Textarea, Badge, Spinner, Alert } from './ui';
 
 export function UpcomingWidget() {
   const [items, setItems] = useState<UpcomingItem[]>([]);
@@ -9,6 +11,7 @@ export function UpcomingWidget() {
   const [newNotes, setNewNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     loadItems();
@@ -37,6 +40,7 @@ export function UpcomingWidget() {
       setNewTitle('');
       setNewStartsAt('');
       setNewNotes('');
+      setShowForm(false);
       await loadItems();
     } catch (err) {
       setError('Failed to create upcoming item');
@@ -79,54 +83,86 @@ export function UpcomingWidget() {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming</h2>
+    <Card variant="gradient">
+      <CardHeader
+        title="Upcoming"
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowForm(!showForm)}
+          >
+            <Plus size={16} className="mr-0.5" />
+            Add Event
+          </Button>
+        }
+      />
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <Alert variant="danger" dismissible onDismiss={() => setError(null)} className="mb-2">
           {error}
-        </div>
+        </Alert>
       )}
 
-      <div className="mb-6 p-4 border border-gray-300 rounded-lg">
-        <input
-          type="text"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          placeholder="Event title"
-          className="w-full p-2 border border-gray-300 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="datetime-local"
-          value={newStartsAt}
-          onChange={(e) => setNewStartsAt(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <textarea
-          value={newNotes}
-          onChange={(e) => setNewNotes(e.target.value)}
-          placeholder="Notes (optional)"
-          className="w-full p-2 border border-gray-300 rounded mb-2 h-16 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleCreate}
-          disabled={loading || !newTitle.trim() || !newStartsAt}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          Add Event
-        </button>
-      </div>
+      {/* Add event form */}
+      {showForm && (
+        <Card variant="outlined" padding="sm" className="mb-2">
+          <div className="space-y-1.5">
+            <Input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Event title"
+              size="sm"
+            />
+            <Input
+              type="datetime-local"
+              value={newStartsAt}
+              onChange={(e) => setNewStartsAt(e.target.value)}
+              size="sm"
+            />
+            <Textarea
+              value={newNotes}
+              onChange={(e) => setNewNotes(e.target.value)}
+              placeholder="Notes (optional)"
+              rows={2}
+              size="sm"
+            />
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                onClick={handleCreate}
+                disabled={loading || !newTitle.trim() || !newStartsAt}
+                loading={loading}
+              >
+                Add Event
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {loading && items.length === 0 ? (
-        <div className="text-center text-gray-400">Loading upcoming items...</div>
+        <div className="flex items-center justify-center py-5">
+          <Spinner size="lg" />
+        </div>
       ) : (
-        <div>
+        <div className="space-y-2">
           {nextItems.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                Upcoming ({nextItems.length})
-              </h3>
-              <div className="space-y-3">
+            <div>
+              <div className="flex items-center gap-1 mb-1">
+                <Calendar size={14} className="text-primary-400" />
+                <h3 className="text-caption font-medium text-surface-400">
+                  Upcoming ({nextItems.length})
+                </h3>
+              </div>
+              <div className="space-y-1">
                 {nextItems.map((item) => (
                   <UpcomingItemRow
                     key={item.id}
@@ -141,10 +177,13 @@ export function UpcomingWidget() {
 
           {pastItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                Past ({pastItems.length})
-              </h3>
-              <div className="space-y-3">
+              <div className="flex items-center gap-1 mb-1">
+                <Clock size={14} className="text-surface-500" />
+                <h3 className="text-caption font-medium text-surface-500">
+                  Past ({pastItems.length})
+                </h3>
+              </div>
+              <div className="space-y-1">
                 {pastItems.map((item) => (
                   <UpcomingItemRow
                     key={item.id}
@@ -159,13 +198,13 @@ export function UpcomingWidget() {
           )}
 
           {items.length === 0 && (
-            <p className="text-center text-gray-400">
+            <p className="text-center text-surface-500 py-4 text-caption">
               No upcoming items. Add one above!
             </p>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -182,26 +221,33 @@ function UpcomingItemRow({
 }) {
   return (
     <div
-      className={`p-3 border border-gray-300 rounded-lg ${
-        isPast ? 'bg-gray-50 opacity-60' : 'hover:bg-blue-50'
+      className={`p-1.5 rounded-lg border transition-base ${
+        isPast
+          ? 'border-surface-700/50 bg-surface-800/30 opacity-60'
+          : 'border-surface-700 bg-surface-800/50 hover:border-surface-600'
       }`}
     >
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-900">{item.title}</h4>
-          <p className="text-sm text-gray-600">
-            {formatDateTime(item.starts_at)}
-          </p>
+      <div className="flex justify-between items-start gap-1">
+        <div className="flex-1 min-w-0">
+          <h4 className="text-caption font-medium text-surface-200 truncate">{item.title}</h4>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Badge variant={isPast ? 'default' : 'primary'} size="sm">
+              {formatDateTime(item.starts_at)}
+            </Badge>
+          </div>
           {item.notes && (
-            <p className="text-sm text-gray-700 mt-1">{item.notes}</p>
+            <p className="text-small text-surface-500 mt-0.5 line-clamp-2">{item.notes}</p>
           )}
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => onDelete(item.id)}
-          className="px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300"
+          className="text-danger-400 hover:text-danger-300 hover:bg-danger-500/10 flex-shrink-0"
+          aria-label={`Delete ${item.title}`}
         >
-          Delete
-        </button>
+          <Trash2 size={14} />
+        </Button>
       </div>
     </div>
   );

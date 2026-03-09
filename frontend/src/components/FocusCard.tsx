@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { focusAPI } from '../lib/api';
 import type { FocusData } from '../lib/api';
+import { Button, Card, CardHeader, Textarea, Alert } from './ui';
 
 export function FocusCard() {
   const [focus, setFocus] = useState<FocusData | null>(null);
@@ -55,66 +56,61 @@ export function FocusCard() {
 
   if (loading && !focus) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center text-gray-400">Loading...</div>
-      </div>
+      <Card variant="gradient" padding="md">
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin h-6 w-6 border-2 border-primary-400 border-t-transparent rounded-full" />
+        </div>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Today's Focus</h2>
+    <Card variant="gradient" padding="md" className="animate-fade-in">
+      <CardHeader
+        title="Today's Focus"
+        action={
+          !isEditing ? (
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button>
+          ) : undefined
+        }
+      />
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <Alert variant="danger" dismissible onDismiss={() => setError(null)} className="mb-2">
           {error}
-        </div>
+        </Alert>
       )}
 
       {!isEditing ? (
-        <div>
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg min-h-24">
-            {focus?.text ? (
-              <p className="text-gray-800 text-lg">{focus.text}</p>
-            ) : (
-              <p className="text-gray-400 italic">
-                No focus set for today. Click edit to add one.
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => setIsEditing(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Edit
-          </button>
+        <div className="rounded-lg bg-surface-800/50 border border-surface-700/50 p-2 min-h-[80px]">
+          {focus?.text ? (
+            <p className="text-body text-surface-200">{focus.text}</p>
+          ) : (
+            <p className="text-body text-surface-500 italic">
+              No focus set for today. Click edit to add one.
+            </p>
+          )}
         </div>
       ) : (
-        <div>
-          <textarea
+        <div className="space-y-2">
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg mb-4 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="What's your main focus for today?"
+            rows={3}
           />
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-            >
+          <div className="flex gap-1.5">
+            <Button onClick={handleSave} loading={loading} size="sm">
               Save
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={loading}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:bg-gray-400"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={loading}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

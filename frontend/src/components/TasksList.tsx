@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { tasksAPI } from '../lib/api';
 import type { Task } from '../lib/api';
+import { Button, Card, CardHeader, Input, Badge, Alert } from './ui';
 
 export function TasksList() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -71,103 +72,104 @@ export function TasksList() {
   const doneTasks = tasks.filter((t) => t.status === 'DONE');
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Tasks</h2>
+    <Card variant="gradient" padding="md" className="animate-fade-in">
+      <CardHeader title="Tasks" />
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <Alert variant="danger" dismissible onDismiss={() => setError(null)} className="mb-2">
           {error}
-        </div>
+        </Alert>
       )}
 
-      <div className="mb-6 p-4 border border-gray-300 rounded-lg">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="New task"
-          className="w-full p-2 border border-gray-300 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="date"
-          value={newDueDate}
-          onChange={(e) => setNewDueDate(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleCreate}
-          disabled={loading || !newTask.trim()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          Add Task
-        </button>
-      </div>
+      {/* Add task form */}
+      <Card variant="outlined" padding="sm" className="mb-3">
+        <div className="space-y-1.5">
+          <Input
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder="New task"
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+          />
+          <Input
+            type="date"
+            value={newDueDate}
+            onChange={(e) => setNewDueDate(e.target.value)}
+          />
+          <Button
+            onClick={handleCreate}
+            disabled={loading || !newTask.trim()}
+            size="sm"
+            fullWidth
+          >
+            Add Task
+          </Button>
+        </div>
+      </Card>
 
       {loading && tasks.length === 0 ? (
-        <div className="text-center text-gray-400">Loading tasks...</div>
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin h-6 w-6 border-2 border-primary-400 border-t-transparent rounded-full" />
+        </div>
       ) : (
-        <div>
-          {todoTasks.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                To Do ({todoTasks.length})
-              </h3>
-              <div className="space-y-2">
-                {todoTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggleStatus}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {doingTasks.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                In Progress ({doingTasks.length})
-              </h3>
-              <div className="space-y-2">
-                {doingTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggleStatus}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {doneTasks.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                Done ({doneTasks.length})
-              </h3>
-              <div className="space-y-2">
-                {doneTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggleStatus}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="space-y-3">
+          <TaskSection
+            title="To Do"
+            tasks={todoTasks}
+            onToggle={handleToggleStatus}
+            onDelete={handleDelete}
+          />
+          <TaskSection
+            title="In Progress"
+            tasks={doingTasks}
+            onToggle={handleToggleStatus}
+            onDelete={handleDelete}
+          />
+          <TaskSection
+            title="Done"
+            tasks={doneTasks}
+            onToggle={handleToggleStatus}
+            onDelete={handleDelete}
+          />
 
           {tasks.length === 0 && (
-            <p className="text-center text-gray-400">
+            <p className="text-center text-surface-500 text-caption py-4">
               No tasks yet. Create one above!
             </p>
           )}
         </div>
       )}
+    </Card>
+  );
+}
+
+function TaskSection({
+  title,
+  tasks,
+  onToggle,
+  onDelete,
+}: {
+  title: string;
+  tasks: Task[];
+  onToggle: (task: Task) => void;
+  onDelete: (id: number) => void;
+}) {
+  if (tasks.length === 0) return null;
+
+  return (
+    <div>
+      <h3 className="text-caption font-semibold text-surface-400 uppercase tracking-wider mb-1.5">
+        {title} ({tasks.length})
+      </h3>
+      <div className="space-y-1">
+        {tasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            onToggle={onToggle}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -181,46 +183,47 @@ function TaskItem({
   onToggle: (task: Task) => void;
   onDelete: (id: number) => void;
 }) {
-  const statusColors = {
-    TODO: 'bg-gray-100',
-    DOING: 'bg-yellow-100',
-    DONE: 'bg-green-100',
+  const statusBadge: Record<string, { variant: 'default' | 'warning' | 'success'; label: string }> = {
+    TODO: { variant: 'default', label: 'To Do' },
+    DOING: { variant: 'warning', label: 'In Progress' },
+    DONE: { variant: 'success', label: 'Done' },
   };
 
+  const badge = statusBadge[task.status];
+
   return (
-    <div className={`p-3 border border-gray-300 rounded-lg ${statusColors[task.status]}`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <p
-            className={`font-semibold ${
-              task.status === 'DONE' ? 'line-through text-gray-400' : 'text-gray-900'
-            }`}
-          >
-            {task.text}
-          </p>
+    <Card variant="outlined" padding="sm" hoverable className="group">
+      <div className="flex justify-between items-start gap-1.5">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 mb-0.5">
+            <p
+              className={`font-medium text-body truncate ${
+                task.status === 'DONE' ? 'line-through text-surface-500' : 'text-surface-100'
+              }`}
+            >
+              {task.text}
+            </p>
+            <Badge variant={badge.variant} size="sm">
+              {badge.label}
+            </Badge>
+          </div>
           {task.due_date && (
-            <p className="text-xs text-gray-600 mt-1">Due: {task.due_date}</p>
+            <p className="text-small text-surface-500">Due: {task.due_date}</p>
           )}
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onToggle(task)}
-            className="px-2 py-1 text-xs bg-blue-200 text-blue-700 rounded hover:bg-blue-300"
-          >
+        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="sm" onClick={() => onToggle(task)}>
             {task.status === 'TODO'
               ? 'Start'
               : task.status === 'DOING'
                 ? 'Done'
                 : 'Reopen'}
-          </button>
-          <button
-            onClick={() => onDelete(task.id)}
-            className="px-2 py-1 text-xs bg-red-200 text-red-700 rounded hover:bg-red-300"
-          >
+          </Button>
+          <Button variant="danger" size="sm" onClick={() => onDelete(task.id)}>
             Delete
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

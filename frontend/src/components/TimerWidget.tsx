@@ -1,10 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Button, Card } from './ui';
+
+const PRESETS = [
+  { label: '25 min', minutes: 25 },
+  { label: '10 min', minutes: 10 },
+  { label: '5 min', minutes: 5 },
+  { label: '1 min', minutes: 1 },
+] as const;
 
 export function TimerWidget() {
-  const [minutes, setMinutes] = useState('25');
-  const [seconds, setSeconds] = useState('00');
   const [isRunning, setIsRunning] = useState(false);
   const [totalSeconds, setTotalSeconds] = useState(25 * 60);
+  const [initialSeconds, setInitialSeconds] = useState(25 * 60);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -32,13 +39,6 @@ export function TimerWidget() {
     };
   }, [isRunning]);
 
-  useEffect(() => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    setMinutes(String(mins).padStart(2, '0'));
-    setSeconds(String(secs).padStart(2, '0'));
-  }, [totalSeconds]);
-
   const handleStart = () => {
     if (totalSeconds > 0) {
       setIsRunning(true);
@@ -51,118 +51,114 @@ export function TimerWidget() {
 
   const handleReset = () => {
     setIsRunning(false);
-    setTotalSeconds(25 * 60);
+    setTotalSeconds(initialSeconds);
   };
 
-  const handleSetPomodoro = () => {
+  const handlePreset = (minutes: number) => {
     setIsRunning(false);
-    setTotalSeconds(25 * 60);
+    const secs = minutes * 60;
+    setTotalSeconds(secs);
+    setInitialSeconds(secs);
   };
 
-  const handleSetBreak = () => {
-    setIsRunning(false);
-    setTotalSeconds(5 * 60);
-  };
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  const progress = initialSeconds > 0 ? (totalSeconds / initialSeconds) * 100 : 0;
+  const circumference = 2 * Math.PI * 90;
+  const strokeDasharray = `${(progress / 100) * circumference} ${circumference}`;
 
-  const handleSetCustom = (mins: number) => {
-    setIsRunning(false);
-    setTotalSeconds(mins * 60);
-  };
-
-  const progress = totalSeconds > 0 ? (totalSeconds / (25 * 60)) * 100 : 0;
+  const progressColor = useMemo(() => {
+    if (totalSeconds === 0) return '#ef4444';
+    if (progress < 20) return '#f59e0b';
+    return 'url(#timerGradient)';
+  }, [totalSeconds, progress]);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Timer</h2>
+    <Card variant="gradient" padding="md" className="animate-fade-in">
+      <h2 className="text-h2 text-surface-100 mb-3">Timer</h2>
 
-      <div className="relative w-48 h-48 mx-auto mb-6">
-        {/* Progress circle */}
+      <div className="relative w-[200px] h-[200px] mx-auto mb-3">
         <svg className="w-full h-full" viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3B82F6" />
+              <stop offset="50%" stopColor="#8B5CF6" />
+              <stop offset="100%" stopColor="#6366F1" />
+            </linearGradient>
+          </defs>
+          {/* Background track */}
           <circle
             cx="100"
             cy="100"
             r="90"
             fill="none"
-            stroke="#e5e7eb"
-            strokeWidth="4"
+            stroke="currentColor"
+            className="text-surface-700/50"
+            strokeWidth="6"
           />
+          {/* Progress arc */}
           <circle
             cx="100"
             cy="100"
             r="90"
             fill="none"
-            stroke="#3b82f6"
-            strokeWidth="4"
-            strokeDasharray={`${(progress / 100) * 565.48} 565.48`}
+            stroke={progressColor}
+            strokeWidth="6"
+            strokeDasharray={strokeDasharray}
             strokeLinecap="round"
-            style={{ transition: 'stroke-dasharray 0.1s linear' }}
+            className="transition-all duration-300 ease-linear"
             transform="rotate(-90 100 100)"
           />
         </svg>
 
-        {/* Timer display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-5xl font-bold text-gray-900">
+          <div className="text-[3.2rem] font-bold text-surface-100 font-mono leading-none tracking-tight">
             {minutes}:{seconds}
           </div>
-          <div className="text-sm text-gray-600 mt-2">
-            {isRunning ? 'Running...' : 'Paused'}
+          <div className="text-caption text-surface-400 mt-1">
+            {totalSeconds === 0
+              ? 'Time\'s up!'
+              : isRunning
+                ? 'Running'
+                : 'Paused'}
           </div>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex gap-2 justify-center">
-          {isRunning ? (
-            <button
-              onClick={handlePause}
-              className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-            >
-              Pause
-            </button>
-          ) : (
-            <button
-              onClick={handleStart}
-              className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Start
-            </button>
-          )}
-          <button
-            onClick={handleReset}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-          >
-            Reset
-          </button>
-        </div>
-
-        <div className="flex gap-2 justify-center flex-wrap">
-          <button
-            onClick={handleSetPomodoro}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-          >
-            25 min
-          </button>
-          <button
-            onClick={handleSetBreak}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-          >
-            5 min break
-          </button>
-          <button
-            onClick={() => handleSetCustom(10)}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-          >
-            10 min
-          </button>
-          <button
-            onClick={() => handleSetCustom(1)}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-          >
-            1 min
-          </button>
-        </div>
+      {/* Action buttons */}
+      <div className="flex gap-1.5 justify-center mb-2">
+        {isRunning ? (
+          <Button variant="outline" size="lg" onClick={handlePause}>
+            Pause
+          </Button>
+        ) : (
+          <Button variant="primary" size="lg" onClick={handleStart} disabled={totalSeconds === 0}>
+            Start
+          </Button>
+        )}
+        <Button variant="secondary" size="lg" onClick={handleReset}>
+          Reset
+        </Button>
       </div>
-    </div>
+
+      {/* Preset buttons */}
+      <div className="flex gap-1 justify-center flex-wrap">
+        {PRESETS.map((preset) => (
+          <Button
+            key={preset.minutes}
+            variant="ghost"
+            size="sm"
+            onClick={() => handlePreset(preset.minutes)}
+            className={
+              initialSeconds === preset.minutes * 60 && !isRunning
+                ? 'bg-primary-500/20 text-primary-300'
+                : ''
+            }
+          >
+            {preset.label}
+          </Button>
+        ))}
+      </div>
+    </Card>
   );
 }

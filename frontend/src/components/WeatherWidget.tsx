@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { RefreshCw, Droplets, Wind } from 'lucide-react';
+import { Card, CardHeader, Button, Spinner, Alert } from './ui';
 
 interface WeatherData {
   temperature: number;
@@ -15,7 +17,6 @@ export function WeatherWidget() {
 
   useEffect(() => {
     loadWeather();
-    // Refresh weather every 10 minutes
     const interval = setInterval(loadWeather, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -24,7 +25,6 @@ export function WeatherWidget() {
     try {
       setLoading(true);
       setError(null);
-      // Default to Toronto, Canada (43.6629, -79.3957)
       const response = await fetch(
         'https://api.open-meteo.com/v1/forecast?latitude=43.6629&longitude=-79.3957&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto'
       );
@@ -46,18 +46,17 @@ export function WeatherWidget() {
   };
 
   const getWeatherIcon = (code: number): string => {
-    // WMO weather code interpretation
-    if (code === 0) return '☀️'; // Clear
-    if (code === 1 || code === 2) return '🌤️'; // Partly cloudy
-    if (code === 3) return '☁️'; // Overcast
-    if (code === 45 || code === 48) return '🌫️'; // Foggy
-    if (code === 51 || code === 53 || code === 55) return '🌧️'; // Drizzle
-    if (code === 61 || code === 63 || code === 65) return '🌧️'; // Rain
-    if (code === 71 || code === 73 || code === 75) return '❄️'; // Snow
-    if (code === 77) return '❄️'; // Snow grains
-    if (code === 80 || code === 81 || code === 82) return '⛈️'; // Showers
-    if (code === 85 || code === 86) return '❄️'; // Snow showers
-    if (code === 95 || code === 96 || code === 99) return '⛈️'; // Thunderstorm
+    if (code === 0) return '☀️';
+    if (code === 1 || code === 2) return '🌤️';
+    if (code === 3) return '☁️';
+    if (code === 45 || code === 48) return '🌫️';
+    if (code === 51 || code === 53 || code === 55) return '🌧️';
+    if (code === 61 || code === 63 || code === 65) return '🌧️';
+    if (code === 71 || code === 73 || code === 75) return '❄️';
+    if (code === 77) return '❄️';
+    if (code === 80 || code === 81 || code === 82) return '⛈️';
+    if (code === 85 || code === 86) return '❄️';
+    if (code === 95 || code === 96 || code === 99) return '⛈️';
     return '🌤️';
   };
 
@@ -88,48 +87,63 @@ export function WeatherWidget() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Weather</h2>
+    <Card variant="gradient">
+      <CardHeader
+        title="Weather"
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={loadWeather}
+            disabled={loading}
+            aria-label="Refresh weather"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </Button>
+        }
+      />
 
       {error && (
-        <div className="p-3 bg-red-100 text-red-700 rounded">
+        <Alert variant="danger" className="mb-2">
           {error}
-        </div>
+        </Alert>
       )}
 
       {loading && !weather ? (
-        <div className="text-center text-gray-400">Loading weather...</div>
+        <div className="flex items-center justify-center py-5">
+          <Spinner size="lg" />
+        </div>
       ) : weather ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-5xl mb-2">
+              <div className="text-display mb-1">
                 {getWeatherIcon(weather.weatherCode)}
               </div>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-h1 text-white">
                 {weather.temperature}°C
               </p>
-              <p className="text-lg text-gray-600">{weather.description}</p>
+              <p className="text-body text-surface-400">{weather.description}</p>
             </div>
-            <div className="text-right text-gray-600 space-y-2">
-              <div>
-                <p className="text-sm">Humidity</p>
-                <p className="text-xl font-semibold">{weather.humidity}%</p>
+            <div className="text-right space-y-2">
+              <div className="flex items-center gap-1 justify-end">
+                <Droplets size={16} className="text-info-400" />
+                <div>
+                  <p className="text-small text-surface-500">Humidity</p>
+                  <p className="text-body font-semibold text-surface-200">{weather.humidity}%</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm">Wind Speed</p>
-                <p className="text-xl font-semibold">{weather.windSpeed} km/h</p>
+              <div className="flex items-center gap-1 justify-end">
+                <Wind size={16} className="text-info-400" />
+                <div>
+                  <p className="text-small text-surface-500">Wind</p>
+                  <p className="text-body font-semibold text-surface-200">{weather.windSpeed} km/h</p>
+                </div>
               </div>
             </div>
           </div>
-          <button
-            onClick={loadWeather}
-            className="text-sm text-blue-500 hover:text-blue-700"
-          >
-            Refresh
-          </button>
         </div>
       ) : null}
-    </div>
+    </Card>
   );
 }
