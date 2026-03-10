@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Posts</h1>
+            <p class="subtitle">A collection of thoughts and ideas</p>
+        </header>
+
+        <main>
+            <div class="posts-list">
+                {% for post in posts %}
+                <article class="post-card">
+                    <h2><a href="posts/{{ post.slug }}.html">{{ post.title }}</a></h2>
+                    <p class="post-meta">{{ post.created_at }}</p>
+                    <p class="post-excerpt">{{ post.excerpt }}</p>
+                    <a href="posts/{{ post.slug }}.html" class="read-more">Read more →</a>
+                </article>
+                {% endfor %}
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

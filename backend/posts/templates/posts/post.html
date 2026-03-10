@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }}</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Posts</h1>
+            <p class="subtitle"><a href="../index.html">← Back to all posts</a></p>
+        </header>
+
+        <main>
+            <article class="post">
+                <h1>{{ post.title }}</h1>
+                <p class="post-meta">{{ post.created_at }}</p>
+                <div class="post-content">
+                    {{ post.body_html|safe }}
+                </div>
+            </article>
+        </main>
+
+        <footer>
+            <p>&copy; 2024. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
