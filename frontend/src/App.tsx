@@ -12,8 +12,9 @@ import GroceryListsPage from './components/grocery/GroceryListsPage';
 import { TodayPage as HabitsTodayPage } from './components/habits/TodayPage';
 import { HabitDetailPage } from './components/habits/HabitDetailPage';
 import { InsightsPage as HabitsInsightsPage } from './components/habits/InsightsPage';
+import { DuePage, AssetsPage, TaskDetailPage, HistoryPage } from './components/maintenance';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance';
 
 function App() {
   const [currentFeature, setCurrentFeature] = useState<Feature>('dashboard');
@@ -50,6 +51,10 @@ function App() {
           <Route path="/habits" element={<HabitsTodayPage />} />
           <Route path="/habits/insights" element={<HabitsInsightsPage />} />
           <Route path="/habits/:id" element={<HabitDetailPage />} />
+          <Route path="/maintenance/due" element={<DuePage />} />
+          <Route path="/maintenance/assets" element={<AssetsPage />} />
+          <Route path="/maintenance/tasks/:id" element={<TaskDetailPage />} />
+          <Route path="/maintenance/history" element={<HistoryPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

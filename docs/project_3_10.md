@@ -1,31 +1,32 @@
-# Project 3/10 — Habit & Streak Tracker (3‑Day Weekend Build)
+# Project 3/10 — Home Maintenance Scheduler (3‑Day Weekend Build)
 
 ## 0) Five 3‑Day Weekend Project Ideas (and why they fit)
-1. **Habit & Streak Tracker** (selected) — CRUD + streak math + calendar UI + simple analytics.
-2. **Home Maintenance Scheduler** — assets (appliances), recurring maintenance tasks, reminders, history log.
-3. **Personal “Link Vault”** — save links, tags, notes, full‑text search, reading queue.
-4. **Workout Planner + PR Tracker** — exercises, routines, logging sets/reps/weight, simple charts.
-5. **Expense Splitter for Trips** — participants, expenses, settlements, export/share.
+1. **Home Maintenance Scheduler** (selected) — asset CRUD + recurring tasks + calendar + history log; very shippable in 3 days.
+2. **Personal “Link Vault”** — save links, tags, notes; search + reading queue.
+3. **Workout Planner + PR Tracker** — routines + workout log + simple charts.
+4. **Expense Splitter for Trips** — participants + expenses + settlement suggestions.
+5. **Plant Watering Tracker** — plant profiles + schedules + last-watered + reminders.
 
 **Already done in this repo (do not repeat):**
 - Personal “Now” Dashboard (project_march_8.md)
 - Recipe & Grocery Generator (project_march_9.md)
+- Habit & Streak Tracker (previous version of project_3_10.md)
 
-This document specifies **Habit & Streak Tracker**.
+This document specifies **Home Maintenance Scheduler**.
 
 ---
 
 ## 1) Goal & Product Definition
-Build a small web app that helps a user define habits, check them off daily/weekly, and track streaks with a calendar view and lightweight insights.
+Build a small web app that helps a homeowner track **assets** (appliances, fixtures, vehicles, filters) and manage **recurring maintenance tasks** (e.g., “Replace HVAC filter every 90 days”, “Descale kettle monthly”), with a clear “What’s due” view and a maintenance history.
 
-**Primary user:** Dominic (single-user MVP; design should be multi-user ready).
+**Primary user:** Dominic (single-user MVP; multi-user ready).
 
-**North-star UX:** Open app → see today’s habits → check off in <5 seconds → streaks update correctly → calendar shows consistency.
+**North-star UX:** Open app → see what’s due this week → mark completed in <10 seconds → next due date updates correctly → history remains searchable.
 
 ### Non-goals (MVP)
-- No push notifications.
-- No social/sharing.
-- No complex goal types (e.g., “spend < $X”, “run 10km”).
+- No SMS/push notifications.
+- No vendor integrations (e.g., Google Calendar).
+- No barcode/receipt scanning.
 
 ---
 
@@ -33,93 +34,134 @@ Build a small web app that helps a user define habits, check them off daily/week
 
 ### 2.1 Authentication
 - User can log in / log out.
-- All habit and check-in data is private per user.
+- All data is private per user.
 
 **Acceptance criteria**
-- Unauthenticated requests to APIs return 401.
-- A user cannot access or mutate other users’ habits/check-ins.
+- Unauthenticated API requests return 401.
+- A user cannot access or mutate other users’ assets/tasks/records.
 
-### 2.2 Habit Management
-A user can create and manage habits.
+---
 
-**Habit fields (MVP)**
-- Name (required)
+### 2.2 Asset Management
+A user can create and manage **assets**.
+
+**Asset fields (MVP)**
+- Name (required) — e.g., “Furnace”, “Dishwasher”, “Car”, “Water softener”
+- Category (required) — enum: `HVAC`, `KITCHEN`, `PLUMBING`, `ELECTRICAL`, `VEHICLE`, `OUTDOOR`, `OTHER`
+- Location (optional) — free text (e.g., “Basement”, “Kitchen”)
+- Manufacturer (optional)
+- Model number (optional)
+- Serial number (optional)
+- Purchase date (optional)
+- Notes (optional)
+- Is archived (boolean)
+
+**Acceptance criteria**
+- Create/edit/archive assets.
+- Archived assets are hidden by default but can be viewed.
+
+---
+
+### 2.3 Maintenance Task Templates (Recurring Tasks)
+A user can define recurring maintenance tasks, optionally linked to an asset.
+
+**Task fields (MVP)**
+- Title (required) — e.g., “Replace filter”
 - Description (optional)
-- Schedule type: `DAILY` or `WEEKLY`
-- If weekly: target times per week (integer, 1–7)
+- Asset (optional FK)
+- Recurrence type (required):
+  - `EVERY_N_DAYS`
+  - `EVERY_N_WEEKS`
+  - `EVERY_N_MONTHS`
+  - `EVERY_N_YEARS`
+- Interval (required integer >= 1)
 - Start date (defaults to today)
-- Active (boolean)
-- Color (optional; for UI)
+- Due date strategy (required):
+  - `FROM_START_DATE` (pure schedule)
+  - `FROM_LAST_COMPLETION` (most common: next due is computed from completion date)
+- Grace window days (optional int, default 0): show as “due soon” before due date
+- Priority (optional): `LOW`, `MEDIUM`, `HIGH`
+- Is active (default true)
+- Is archived (default false)
+
+**Computed fields**
+- Next due date (computed)
+- Status (computed): `OVERDUE`, `DUE_SOON`, `UPCOMING`, `SCHEDULED`
 
 **Acceptance criteria**
-- Create/edit/archive (soft delete) habits.
-- Archived habits are not shown on the Today view by default.
+- Create/edit/archive task templates.
+- A task can exist without an asset.
+- Next due date is computed consistently on backend and frontend.
 
-### 2.3 Check-ins (Completions)
-A user can mark a habit completed for a given date.
+---
 
-**Rules**
-- Check-ins are date-based (local date, not datetime).
-- For daily habits: at most **one** check-in per day.
-- For weekly habits: check-ins still occur on specific dates; weekly completion is derived from counts in that week.
+### 2.4 Maintenance Records (Completions / History)
+The user can record that a task was completed.
 
-**Acceptance criteria**
-- Toggle completion for today.
-- Toggle completion for any past date within a configurable window (MVP: last 90 days).
-- Idempotent behavior (toggling the same date twice results in deletion of the check-in).
+**Record fields (MVP)**
+- Task template (required FK)
+- Completed date (required, date)
+- Notes (optional)
+- Cost (optional decimal)
+- Performed by (optional) — free text (e.g., “me”, “HVAC company”)
+- Attachment URL (optional, skip upload in MVP; store a URL)
 
-### 2.4 Streak Calculation
-The app must compute streaks reliably.
-
-**Definitions**
-- **Daily habit streak:** consecutive days with a check-in.
-- **Weekly habit streak:** consecutive weeks where weekly target is met.
+**Behavior**
+- When a completion record is created, the task’s “last completed date” updates and **next due date** recalculates according to strategy.
 
 **Acceptance criteria**
-- Streak values are consistent between backend and frontend.
-- Streaks respect the habit’s start date.
+- User can add a completion record from the Due view and from task detail.
+- History shows records newest-first and is filterable by asset and date range.
 
-### 2.5 Views / UX (MVP)
+---
 
-#### A) Today
-- Shows active habits.
-- Each habit row shows:
-  - name
-  - schedule (daily or weekly target)
-  - completion state for today
-  - current streak
-- Quick toggle completion.
+### 2.5 Due View (Core UX)
+The app shows a prioritized list of tasks.
 
-#### B) Habit Detail
-- Stats summary: current streak, best streak, total check-ins.
-- Calendar heatmap or month grid showing completion by day.
-- Ability to toggle completion for a date.
+**Sections**
+- Overdue
+- Due soon (within grace window OR within next 7 days)
+- Upcoming (next 30 days)
 
-#### C) Insights
-- Simple list/cards:
-  - “Most consistent” (highest completion rate in last 30 days)
-  - “At risk” (no check-in in last N days for daily habits; below pace for weekly)
-  - Completion chart (last 14 days) optional
+Each row shows:
+- Task title
+- Asset name (if any)
+- Next due date
+- Status pill
+- Quick actions: “Mark done”
+
+**Acceptance criteria**
+- Page loads with one request (or two max).
+- Marking done immediately refreshes status and due date.
+
+---
+
+### 2.6 Search & Filtering
+- Search tasks/assets by text (title/name).
+- Filter tasks by category, asset, status.
+
+**Acceptance criteria**
+- Searching "filter" returns tasks like “Replace HVAC filter”.
 
 ---
 
 ## 3) Non-Functional Requirements
 
 ### 3.1 Performance
-- Today page should render with one request (or two max): a single endpoint returning habits + today completion + computed streaks.
-- Calendar view should paginate or load a bounded date range (default last 90 days).
+- “Due” view should render quickly with bounded queries.
+- Avoid N+1 queries (prefetch related asset).
 
 ### 3.2 Reliability & Correctness
-- Streak calculations must be unit-tested.
-- Date handling must be explicit and consistent (server stores dates; client sends dates).
+- Recurrence calculation must be unit-tested.
+- Date handling is explicit (date-only, not datetime).
 
 ### 3.3 Security
-- Use authenticated API patterns (cookie session auth + CSRF or token/JWT—pick one and be consistent).
+- Strong object-level permissions.
 - Validate all user inputs.
 
 ### 3.4 UX Quality
-- Clear loading/empty/error states.
-- Keyboard accessible toggles and forms.
+- Clear empty/loading/error states.
+- Keyboard accessible forms and buttons.
 
 ---
 
@@ -127,135 +169,175 @@ The app must compute streaks reliably.
 
 ### 4.1 Suggested Stack
 - Django + Django REST Framework
-- DB: SQLite OK for weekend; PostgreSQL-ready models.
+- DB: SQLite acceptable for weekend; models should be PostgreSQL-ready.
 
-### 4.2 Django App
-- Create a new app: `habits`.
-- API base path: `/api/habits/…`
+### 4.2 Django Apps
+- Create app: `maintenance`
+- API base path: `/api/maintenance/…`
+
+---
 
 ### 4.3 Data Model
 
-#### Habit
+#### Asset
 - `id` (UUID)
 - `user` (FK → auth user)
-- `name` (CharField, required)
-- `description` (TextField, blank)
-- `schedule_type` (choices: `DAILY`, `WEEKLY`)
-- `weekly_target` (PositiveSmallIntegerField, null/blank; required when schedule_type=WEEKLY)
-- `start_date` (DateField)
-- `is_active` (BooleanField, default True)
-- `is_archived` (BooleanField, default False)
-- `color` (CharField, blank; e.g. hex)
+- `name` (CharField)
+- `category` (CharField choices)
+- `location` (CharField blank)
+- `manufacturer` (CharField blank)
+- `model_number` (CharField blank)
+- `serial_number` (CharField blank)
+- `purchase_date` (DateField null/blank)
+- `notes` (TextField blank)
+- `is_archived` (BooleanField default False)
 - `created_at`, `updated_at`
 
-**Constraints / indexes**
-- Index: `(user, is_archived, is_active)`
-- Validation: weekly_target in 1..7 when weekly.
+**Constraints / Indexes**
+- Index: `(user, is_archived, category)`
 
-#### HabitCheckin
+#### MaintenanceTask
+(Recurring task template)
 - `id` (UUID)
-- `user` (FK → auth user)  *(denormalized for easier permission checks and indexes)*
-- `habit` (FK → Habit)
-- `date` (DateField)
+- `user` (FK)
+- `asset` (FK → Asset, null/blank, on_delete=SET_NULL)
+- `title` (CharField)
+- `description` (TextField blank)
+- `recurrence_type` (choices)
+- `interval` (PositiveSmallIntegerField)
+- `start_date` (DateField)
+- `due_strategy` (choices: `FROM_START_DATE`, `FROM_LAST_COMPLETION`)
+- `grace_days` (PositiveSmallIntegerField default 0)
+- `priority` (choices: `LOW`, `MEDIUM`, `HIGH`; default `MEDIUM`)
+- `is_active` (BooleanField default True)
+- `is_archived` (BooleanField default False)
+- **Denormalized helper fields (optional but recommended for speed):**
+  - `last_completed_date` (DateField null/blank)
+  - `next_due_date` (DateField null/blank)
+- `created_at`, `updated_at`
+
+**Constraints / Indexes**
+- Index: `(user, is_archived, is_active, next_due_date)`
+- Validation: interval >= 1; recurrence_type required
+
+#### MaintenanceRecord
+(Completion history)
+- `id` (UUID)
+- `user` (FK) *(denormalized for permission checks)*
+- `task` (FK → MaintenanceTask)
+- `completed_date` (DateField)
+- `notes` (TextField blank)
+- `cost` (DecimalField null/blank)
+- `performed_by` (CharField blank)
+- `attachment_url` (URLField blank)
 - `created_at`
 
-**Constraints / indexes**
-- Unique constraint: `(habit, date)`
-- Index: `(user, date)` and `(habit, date)`
-- Enforce: checkin.date >= habit.start_date
+**Constraints / Indexes**
+- Index: `(user, completed_date)` and `(task, completed_date)`
 
-#### (Optional MVP) HabitStatsSnapshot
-Skip for MVP unless needed for performance. Prefer computing on the fly for bounded ranges.
+---
 
-### 4.4 Streak / Analytics Logic
-Implement in a pure-python service module, e.g. `habits/services/streaks.py`.
+### 4.4 Recurrence & Status Logic
+Implement in a pure-python service module, e.g. `maintenance/services/recurrence.py`.
 
-**Inputs**
-- Habit definition
-- Set/list of check-in dates (bounded range)
-- “Today” date
+**Key functions**
+- `compute_next_due_date(task: MaintenanceTask, from_date: date) -> date`
+  - `from_date` is either `task.start_date` or `record.completed_date` depending on strategy.
+- `compute_status(next_due: date, today: date, grace_days: int) -> Status`
 
-**Outputs**
-- `current_streak`
-- `best_streak` (within available history; for MVP compute within last 365 days or since start_date)
-- `completion_rate_30d` for daily habits
-- Weekly pace for weekly habits
+**Rules (MVP, must be documented and consistent)**
+- All calculations are **date-only**.
+- `DUE_SOON` if `today >= next_due - grace_days` and `today < next_due`.
+- `OVERDUE` if `today > next_due`.
+- `UPCOMING` if next_due within next 30 days but not due soon.
+- `SCHEDULED` otherwise.
 
-**Weekly definition (important)**
-- Use ISO week (Mon–Sun) OR locale default; choose one and document.
-- Weekly streak increments when `count(checkins in week) >= weekly_target`.
+**Month/year recurrence**
+- Use `dateutil.relativedelta` to add months/years.
+- Day-of-month edge cases: if starting on 31st, adding a month should clamp to end-of-month (relativedelta does this sensibly).
+
+**When creating/updating a task**
+- If `next_due_date` is empty, compute from `start_date`.
+
+**When creating a completion record**
+- Update `last_completed_date` to record.completed_date.
+- Recompute `next_due_date`:
+  - If strategy `FROM_LAST_COMPLETION`: from record.completed_date
+  - Else: from task.start_date, but advance forward until > today (or until after last completion) — choose one behavior and test it. Recommendation:
+    - `FROM_START_DATE`: compute schedule anchored at start_date and choose the **next occurrence after today**.
+
+---
 
 ### 4.5 API Endpoints (DRF)
 All endpoints require authentication.
 
-#### Habits CRUD
-- `GET /api/habits/habits/` — list habits (query params: `archived=false|true`, `active=true|false`)
-- `POST /api/habits/habits/` — create habit
-- `GET /api/habits/habits/{id}/` — habit detail
-- `PATCH /api/habits/habits/{id}/` — update
-- `DELETE /api/habits/habits/{id}/` — soft-archive (recommended) or hard delete (not recommended)
+#### Assets
+- `GET /api/maintenance/assets/?archived=false&category=HVAC&search=...`
+- `POST /api/maintenance/assets/`
+- `GET /api/maintenance/assets/{id}/`
+- `PATCH /api/maintenance/assets/{id}/`
+- `DELETE /api/maintenance/assets/{id}/` (soft archive)
 
-#### Today summary (optimized)
-- `GET /api/habits/today/?date=YYYY-MM-DD`
+#### Tasks
+- `GET /api/maintenance/tasks/?archived=false&active=true&status=OVERDUE&asset_id=...&search=...`
+- `POST /api/maintenance/tasks/`
+- `GET /api/maintenance/tasks/{id}/`
+- `PATCH /api/maintenance/tasks/{id}/`
+- `DELETE /api/maintenance/tasks/{id}/` (soft archive)
+
+#### Due Summary (optimized)
+- `GET /api/maintenance/due/?date=YYYY-MM-DD&window_days=30`
 
 **Response**
-- List of active, non-archived habits with:
-  - habit fields
-  - `completed_today` (boolean)
-  - `current_streak`
-  - `best_streak`
-  - For weekly habits: `week_progress` (e.g. 2/3 this week)
-
-#### Check-ins
-- `POST /api/habits/checkins/toggle/`
-
-**Payload**
 ```json
-{ "habit_id": "…", "date": "YYYY-MM-DD" }
+{
+  "today": "2026-03-10",
+  "overdue": [ { "task": {..}, "asset": {..}, "next_due_date": "...", "status": "OVERDUE" } ],
+  "due_soon": [ ... ],
+  "upcoming": [ ... ]
+}
+```
+
+#### Records
+- `GET /api/maintenance/records/?task_id=...&asset_id=...&from=YYYY-MM-DD&to=YYYY-MM-DD`
+- `POST /api/maintenance/records/`
+
+**Create payload**
+```json
+{ "task_id": "…", "completed_date": "YYYY-MM-DD", "notes": "…", "cost": "19.99" }
 ```
 
 **Behavior**
-- If check-in exists → delete it.
-- If not exists → create it.
+- On create: update task.last_completed_date and task.next_due_date; return updated task summary.
 
-**Response**
-- `completed` boolean
-- Updated streak fields for that habit.
+#### Task timeline / calendar (optional MVP)
+- `GET /api/maintenance/tasks/{id}/timeline/?from=YYYY-MM-DD&to=YYYY-MM-DD`
+- Returns computed due dates + completion dates (helps build a calendar UI).
 
-#### Habit calendar
-- `GET /api/habits/habits/{id}/calendar/?from=YYYY-MM-DD&to=YYYY-MM-DD`
-
-**Response**
-- Array of dates completed
-- Optional: computed per-day metadata (not required)
-
-#### Insights
-- `GET /api/habits/insights/?window_days=30`
-
-**Response**
-- Most consistent habits
-- At-risk habits
-- Optional summary counts
+---
 
 ### 4.6 Permissions
-- Default permission: authenticated.
-- Object-level permission: `habit.user == request.user` and `checkin.user == request.user`.
+- Default: authenticated.
+- Object-level: `obj.user == request.user` for Asset/Task/Record.
+
+---
 
 ### 4.7 Validation & Edge Cases
-- Prevent check-ins for archived habits (either disallow or allow but hide; MVP: disallow).
-- Prevent check-ins before start_date.
-- Ensure weekly_target required iff schedule_type=WEEKLY.
+- Prevent record creation for archived tasks.
+- If a task is linked to an archived asset, keep it but show asset as archived (or disallow linking on update).
+- Ensure `next_due_date` is always set for active tasks.
+
+---
 
 ### 4.8 Testing (Minimum)
-- Streak unit tests:
-  - daily streak with gaps
-  - daily streak around start_date
-  - weekly streak meeting/missing targets
-  - ISO week boundary behavior
+- Recurrence unit tests:
+  - every N days
+  - monthly from Jan 31st
+  - strategy FROM_LAST_COMPLETION vs FROM_START_DATE
 - API tests:
-  - cannot access another user’s habits
-  - toggle endpoint idempotency
-  - calendar endpoint returns correct dates
+  - cannot read other user’s tasks
+  - due endpoint sections correct
+  - creating record updates next_due_date
 
 ---
 
@@ -268,85 +350,102 @@ All endpoints require authentication.
 - Styling: Tailwind (or match existing repo conventions)
 
 ### 5.2 Frontend Architecture
-- `src/api/habits.ts` — typed API client functions
-- `src/features/habits/`:
-  - `TodayPage.tsx`
-  - `HabitDetailPage.tsx`
-  - `InsightsPage.tsx`
-  - components: `HabitRow`, `HabitFormModal`, `CalendarGrid`, `StreakBadge`
+- `src/api/maintenance.ts` — typed API client functions
+- `src/features/maintenance/`:
+  - `DuePage.tsx`
+  - `AssetsPage.tsx`
+  - `AssetDetailPage.tsx`
+  - `TaskDetailPage.tsx`
+  - `HistoryPage.tsx`
+  - components: `DueTaskRow`, `TaskForm`, `AssetForm`, `StatusPill`, `RecordModal`, `FilterBar`
+
+---
 
 ### 5.3 Pages & Components
 
-#### A) TodayPage (`/` or `/habits/today`)
-- Query: `GET /api/habits/today`
-- Render list of habits.
-- Each habit row has a checkbox/toggle button.
+#### A) DuePage (`/` or `/maintenance/due`)
+- Query: `GET /api/maintenance/due`
+- Render sections: Overdue, Due soon, Upcoming.
 
-**Interactions**
-- Toggle completion calls `POST /api/habits/checkins/toggle/` and updates list via optimistic update.
+**Row content**
+- Title, asset name, due date, status pill, priority indicator.
 
-#### B) HabitDetailPage (`/habits/:id`)
-- Query habit detail + calendar range (default last 90 days).
-- CalendarGrid displays month view with completed days highlighted.
-- Clicking a day toggles completion (within allowed window).
+**Primary action: Mark done**
+- Opens `RecordModal` prefilled with today’s date.
+- On submit: `POST /api/maintenance/records/` then invalidates `due` query.
 
-#### C) InsightsPage (`/habits/insights`)
-- Query: `GET /api/habits/insights?window_days=30`
-- Cards: Most consistent, At risk.
+#### B) AssetsPage (`/maintenance/assets`)
+- List assets with search + category filter.
+- CTA: “Add asset”.
 
-#### D) Habit Create/Edit
-- Modal or dedicated route.
-- Fields with validation:
-  - name required
-  - schedule type
-  - weekly target conditional
-  - start date
+#### C) AssetDetailPage (`/maintenance/assets/:id`)
+- Shows asset info + tasks linked to it.
+- CTA: “Add task for this asset”.
+
+#### D) TaskDetailPage (`/maintenance/tasks/:id`)
+- Shows task definition + computed next due + last completed.
+- Shows record history table.
+- CTA: “Add completion record”.
+
+#### E) HistoryPage (`/maintenance/history`)
+- Query records by date range (default last 90 days).
+- Filters: asset, task, cost present.
+
+---
 
 ### 5.4 UI/UX Details
-- Show streak as a badge.
-- Weekly habits show a progress pill (e.g., “2/3 this week”).
-- Calendar range selector optional; default to last 90 days.
+- Status colors:
+  - OVERDUE: red
+  - DUE_SOON: amber
+  - UPCOMING: blue/gray
+- Quick filters at top of DuePage: `All`, `HVAC`, `Kitchen`, `Vehicle`, `Overdue`.
+- Empty states:
+  - No tasks: prompt to create first task.
+  - No overdue: show a small “All caught up” card.
+
+---
 
 ### 5.5 Error Handling
-- Global toast/snackbar for failed requests.
-- Disable toggles while mutation is in-flight (or handle optimistic rollback).
+- Global toast for errors.
+- Disable submit buttons while in-flight; show inline form errors from API.
+
+---
 
 ### 5.6 Frontend Testing (MVP)
-- Unit test streak badge rendering and calendar day toggle behavior.
-- One e2e smoke test (optional): create habit → toggle today → streak increments.
+- Component test: StatusPill rendering.
+- Integration test: DuePage renders sections given mocked response.
 
 ---
 
 ## 6) Data/Date Conventions (Critical)
 - Client sends dates as `YYYY-MM-DD`.
-- Server stores `DateField` (no timezone).
-- “Today” is determined on server; client may request an explicit date for testing.
-- Weekly boundaries: **ISO week (Mon–Sun)** (document and test).
+- Server stores date-only (Django `DateField`).
+- “Today” determined on server; allow `?date=` override for testing.
 
 ---
 
 ## 7) 3‑Day Build Plan
 
 ### Day 1
-- Create `habits` app + models + migrations
-- Implement Habit CRUD
-- Implement check-in toggle endpoint
-- Basic Today page UI
+- Create `maintenance` app, models, migrations
+- Assets CRUD API + basic UI
+- Tasks CRUD API + compute `next_due_date` on save
 
 ### Day 2
-- Implement streak service + tests
-- Today endpoint returning computed fields
-- Habit detail + calendar endpoint
-- Calendar UI
+- Records API; on record create update task due dates
+- Due summary endpoint
+- DuePage UI with mark-done flow
+- Unit tests for recurrence
 
 ### Day 3
-- Insights endpoint + UI
-- Polish UX (empty states, loading)
-- Hardening: permissions tests, validation, linting
-- README updates
+- Task/Asset detail pages + history view
+- Search/filter polish
+- Permissions tests, edge cases, linting
+- Small UX polish (empty states, quick filters)
 
 ---
 
 ## 8) Open Implementation Choices (make a call; no user input required)
-- Auth approach: use whatever the repo already uses (session auth recommended for single-user).
-- Streak best_streak scope: compute from start_date up to today; if too slow, cap to 365 days and document.
+- Prefer session auth if repo already uses it.
+- Use `python-dateutil` for month/year recurrence.
+- Store `next_due_date` denormalized on the task for simple querying; recompute on task update and record create.

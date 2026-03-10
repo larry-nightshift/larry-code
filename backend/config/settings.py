@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'recipes',
     'grocery',
     'habits',
+    'maintenance',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
