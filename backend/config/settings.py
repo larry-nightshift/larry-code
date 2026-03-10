@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'journalapp',
     'recipes',
     'grocery',
+    'habits',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

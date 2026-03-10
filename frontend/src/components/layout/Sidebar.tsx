@@ -1,6 +1,6 @@
-import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart } from 'lucide-react';
+import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart, Flame } from 'lucide-react';
 
-type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery';
+type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits';
 
 interface SidebarProps {
   currentFeature: Feature;
@@ -16,6 +16,7 @@ const menuItems: Array<{ id: Feature; label: string; icon: React.ReactNode }> = 
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={20} /> },
   { id: 'recipes', label: 'Recipes', icon: <UtensilsCrossed size={20} /> },
   { id: 'grocery', label: 'Grocery Lists', icon: <ShoppingCart size={20} /> },
+  { id: 'habits', label: 'Habits', icon: <Flame size={20} /> },
 ];
 
 export function Sidebar({ currentFeature, onFeatureChange, isOpen, onClose }: SidebarProps) {

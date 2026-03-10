@@ -202,3 +202,112 @@ export const groceryAPI = {
       method: 'POST',
     }),
 };
+
+// Habit types
+export interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+  schedule_type: 'DAILY' | 'WEEKLY';
+  weekly_target?: number;
+  start_date: string;
+  is_active: boolean;
+  is_archived: boolean;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TodayHabit extends Habit {
+  completed_today: boolean;
+  current_streak: number;
+  best_streak: number;
+  week_progress?: { completed: number; target: number; display: string };
+}
+
+export interface HabitCalendar {
+  habit_id: string;
+  habit_name: string;
+  from: string;
+  to: string;
+  dates: string[];
+}
+
+export interface InsightStat {
+  id: string;
+  name: string;
+  schedule_type: string;
+  completion_rate: number;
+  completed: number;
+  total: number;
+}
+
+export interface Insights {
+  window_days: number;
+  most_consistent: InsightStat[];
+  at_risk: InsightStat[];
+  total_habits: number;
+}
+
+export const habitsAPI = {
+  // Habits CRUD
+  list: (archived?: boolean, active?: boolean) => {
+    const params = new URLSearchParams();
+    if (archived !== undefined) params.append('archived', String(archived));
+    if (active !== undefined) params.append('active', String(active));
+    return request(`/habits/habits/?${params.toString()}`);
+  },
+  create: (data: {
+    name: string;
+    description?: string;
+    schedule_type: 'DAILY' | 'WEEKLY';
+    weekly_target?: number;
+    start_date: string;
+    color?: string;
+  }) =>
+    request('/habits/habits/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  get: (id: string) => request(`/habits/habits/${id}/`),
+  update: (id: string, data: Partial<Habit>) =>
+    request(`/habits/habits/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request(`/habits/habits/${id}/`, {
+      method: 'DELETE',
+    }),
+  archive: (id: string) =>
+    request(`/habits/habits/${id}/archive/`, {
+      method: 'POST',
+    }),
+  unarchive: (id: string) =>
+    request(`/habits/habits/${id}/unarchive/`, {
+      method: 'POST',
+    }),
+
+  // Check-ins
+  toggle: (habit_id: string, date: string) =>
+    request('/habits/checkins/toggle/', {
+      method: 'POST',
+      body: JSON.stringify({ habit_id, date }),
+    }),
+
+  // Views
+  today: (date?: string) => {
+    const params = date ? `?date=${date}` : '';
+    return request(`/habits/today/${params}`);
+  },
+  calendar: (habit_id: string, from?: string, to?: string) => {
+    const params = new URLSearchParams();
+    if (from) params.append('from', from);
+    if (to) params.append('to', to);
+    return request(`/habits/habits/${habit_id}/calendar/?${params.toString()}`);
+  },
+  insights: (window_days?: number) => {
+    const params = window_days ? `?window_days=${window_days}` : '';
+    return request(`/habits/insights/${params}`);
+  },
+};
