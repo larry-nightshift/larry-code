@@ -1,19 +1,17 @@
-import { TodayHabit } from '../../lib/api';
+import { TodayHabit } from '../../lib/habitsService';
 import { Button, Badge } from '../ui';
 import { StreakBadge } from './StreakBadge';
 
 interface HabitRowProps {
   habit: TodayHabit;
-  onToggle: () => void;
-  isLoading: boolean;
+  onToggle: (habitId: string) => void;
 }
 
-export function HabitRow({ habit, onToggle, isLoading }: HabitRowProps) {
+export function HabitRow({ habit, onToggle }: HabitRowProps) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-800 hover:bg-surface-700/50 transition-base">
       <button
-        onClick={onToggle}
-        disabled={isLoading}
+        onClick={() => onToggle(habit.id)}
         className={`flex-shrink-0 w-6 h-6 rounded-md border-2 transition-base ${
           habit.completed_today
             ? 'bg-success-500 border-success-500'

@@ -27,9 +27,10 @@ export function TodayPage() {
     }
   };
 
-  const handleToggleCheckin = async (habit_id: string, date: string) => {
+  const handleToggleCheckin = async (habit_id: string) => {
     try {
-      const response = await toggleCheckin(habit_id, date);
+      const today = new Date().toISOString().split('T')[0];
+      const response = await toggleCheckin(habit_id, today);
       // Update local state optimistically
       setHabits(
         habits.map((h) =>
@@ -94,7 +95,11 @@ export function TodayPage() {
         ) : (
           <div className="space-y-2 mt-2">
             {habits.map((habit) => (
-              <HabitRow key={habit.id} habit={habit} onToggle={handleToggleCheckin} />
+              <HabitRow
+                key={habit.id}
+                habit={habit}
+                onToggle={() => handleToggleCheckin(habit.id)}
+              />
             ))}
           </div>
         )}
