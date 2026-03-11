@@ -15,8 +15,16 @@ import { InsightsPage as HabitsInsightsPage } from './components/habits/Insights
 import { DuePage, AssetsPage, TaskDetailPage, HistoryPage } from './components/maintenance';
 import { PostsList } from './components/posts';
 import { ContactsList, ContactDetail, Reminders } from './components/crm';
+import ExercisesPage from './components/workouts/ExercisesPage';
+import RoutinesPage from './components/workouts/RoutinesPage';
+import WorkoutStartPage from './components/workouts/WorkoutStartPage';
+import WorkoutSessionPage from './components/workouts/WorkoutSessionPage';
+import WorkoutDetailPage from './components/workouts/WorkoutDetailPage';
+import HistoryPage as WorkoutHistoryPage from './components/workouts/HistoryPage';
+import PRsPage from './components/workouts/PRsPage';
+import ExerciseProgressPage from './components/workouts/ExerciseProgressPage';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts';
 
 const featureRoutes: Record<Feature, string> = {
   dashboard: '/',
@@ -29,6 +37,7 @@ const featureRoutes: Record<Feature, string> = {
   maintenance: '/maintenance/due',
   posts: '/posts',
   crm: '/crm/contacts',
+  workouts: '/workouts/start',
 };
 
 function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Feature; setCurrentFeature: (f: Feature) => void }) {
@@ -99,6 +108,14 @@ function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Fea
           <Route path="/crm/contacts" element={<ContactsList />} />
           <Route path="/crm/contact/:id" element={<ContactDetail />} />
           <Route path="/crm/reminders" element={<Reminders />} />
+          <Route path="/workouts/start" element={<WorkoutStartPage />} />
+          <Route path="/workouts/exercises" element={<ExercisesPage />} />
+          <Route path="/workouts/routines" element={<RoutinesPage />} />
+          <Route path="/workouts/session/:id" element={<WorkoutSessionPage />} />
+          <Route path="/workouts/:id" element={<WorkoutDetailPage />} />
+          <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
+          <Route path="/workouts/prs" element={<PRsPage />} />
+          <Route path="/workouts/progress/:exerciseId" element={<ExerciseProgressPage />} />
         </Routes>
       </Layout>
   );

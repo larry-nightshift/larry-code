@@ -22,4 +22,5 @@ urlpatterns = [
     path('maintenance/', include('maintenance.urls')),
     path('site/', include('posts.urls')),
     path('crm/', include('crm.urls')),
+    path('workouts/', include('workouts.urls')),
 ]

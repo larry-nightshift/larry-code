@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'maintenance',
     'posts',
     'crm',
+    'workouts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
