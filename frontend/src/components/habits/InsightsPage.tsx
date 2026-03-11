@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, Alert, Spinner, Badge } from '../ui';
-import { getInsights, InsightsData } from '../../lib/habitsService';
+import type { InsightsData } from '../../lib/habitsService';
+import { getInsights } from '../../lib/habitsService';
 
 export function InsightsPage() {
   const [insights, setInsights] = useState<InsightsData | null>(null);

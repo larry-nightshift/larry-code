@@ -4,15 +4,13 @@ import { Card, CardHeader, Button, Alert, Spinner, Badge } from '../ui';
 import { CalendarGrid } from './CalendarGrid';
 import { StreakBadge } from './StreakBadge';
 import { HabitFormModal } from './HabitFormModal';
+import type { TodayHabit, Habit, CalendarData } from '../../lib/habitsService';
 import {
   habitDetail,
   getHabitCalendar,
   toggleCheckin,
   updateHabit,
   deleteHabit,
-  TodayHabit,
-  Habit,
-  CalendarData,
 } from '../../lib/habitsService';
 
 export function HabitDetailPage() {
@@ -151,9 +149,9 @@ export function HabitDetailPage() {
 
           {calendar && (
             <CalendarGrid
-              completedDates={calendar.dates}
-              onDateToggle={handleDateToggle}
-              month={month}
+              dates={calendar.dates}
+              onDateClick={handleDateToggle}
+              color={habit?.color}
             />
           )}
         </div>

@@ -1,5 +1,5 @@
-import { TodayHabit } from '../../lib/habitsService';
-import { Button, Badge } from '../ui';
+import type { TodayHabit } from '../../lib/habitsService';
+import { Badge } from '../ui';
 import { StreakBadge } from './StreakBadge';
 
 interface HabitRowProps {

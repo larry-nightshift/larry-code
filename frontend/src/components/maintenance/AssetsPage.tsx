@@ -10,11 +10,9 @@ export function AssetsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('');
-  const [showArchived, setShowArchived] = useState(false);
-
-  const { data, isLoading, error: queryError, refetch } = useQuery({
-    queryKey: ['maintenance-assets', { search, category, showArchived }],
-    queryFn: () => assetsList(!showArchived, category || undefined, search || undefined),
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['maintenance-assets', { search, category }],
+    queryFn: () => assetsList(true, category || undefined, search || undefined),
   });
 
   const handleAssetCreated = () => {

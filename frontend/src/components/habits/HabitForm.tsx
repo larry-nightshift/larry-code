@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Habit } from '../../lib/api';
+import type { Habit } from '../../lib/habitsService';
 import { Button, Input, Select, Textarea, Alert } from '../ui';
 import { useForm } from '../../hooks/useForm';
 
@@ -27,7 +27,7 @@ const colorOptions = [
 ];
 
 export function HabitForm({ initialHabit, onSubmit, isLoading, error }: HabitFormProps) {
-  const { getFieldProps, values, isValid, validate } = useForm({
+  const { getFieldProps, values, validate } = useForm({
     name: {
       initialValue: initialHabit?.name || '',
       rules: { required: 'Habit name is required' },

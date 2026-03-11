@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, Button, Alert, Spinner } from '../ui';
 import { HabitRow } from './HabitRow';
 import { HabitFormModal } from './HabitFormModal';
-import { getToday, toggleCheckin, createHabit, TodayHabit, Habit } from '../../lib/habitsService';
+import type { TodayHabit, Habit } from '../../lib/habitsService';
+import { getToday, toggleCheckin, createHabit } from '../../lib/habitsService';
 
 export function TodayPage() {
   const [habits, setHabits] = useState<TodayHabit[]>([]);

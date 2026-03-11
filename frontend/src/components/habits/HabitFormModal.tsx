@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, Button, Input, Select, Spinner, Alert } from '../ui';
-import { Habit } from '../../lib/habitsService';
+import type { Habit } from '../../lib/habitsService';
 
 interface HabitFormModalProps {
   open: boolean;

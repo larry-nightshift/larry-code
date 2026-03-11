@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { DueTask } from '../../lib/maintenanceService';
-import { Card, CardHeader, Button, Alert, Spinner } from '../ui';
+import { Card, Button, Alert, Spinner } from '../ui';
 import { getDue, createRecord } from '../../lib/maintenanceService';
 import { RecordModal } from './RecordModal';
 import { DueTaskRow } from './DueTaskRow';
