@@ -121,9 +121,9 @@ function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Fea
           <Route path="/inventory" element={<InventoryDashboard />} />
           <Route path="/inventory/items" element={<ItemsList />} />
           <Route path="/inventory/items/new" element={<ItemForm />} />
-          <Route path="/inventory/items/:id" element={<ItemDetailPage />} />
-          <Route path="/inventory/items/:id/edit" element={<ItemForm itemId={useParams<{ id: string }>().id} />} />
-          <Route path="/inventory/locations" element={<LocationsPage />} />
+          <Route path="/inventory/items/:id" element={<ItemDetail />} />
+          <Route path="/inventory/items/:id/edit" element={<ItemForm />} />
+          <Route path="/inventory/locations" element={<LocationsList />} />
         </Routes>
       </Layout>
   );
