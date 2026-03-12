@@ -23,8 +23,9 @@ import WorkoutDetailPage from './components/workouts/WorkoutDetailPage';
 import HistoryPage as WorkoutHistoryPage from './components/workouts/HistoryPage';
 import PRsPage from './components/workouts/PRsPage';
 import ExerciseProgressPage from './components/workouts/ExerciseProgressPage';
+import { InventoryDashboard, ItemsList, ItemForm, ItemDetailPage, LocationsPage } from './components/inventory';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory';
 
 const featureRoutes: Record<Feature, string> = {
   dashboard: '/',
@@ -38,6 +39,7 @@ const featureRoutes: Record<Feature, string> = {
   posts: '/posts',
   crm: '/crm/contacts',
   workouts: '/workouts/start',
+  inventory: '/inventory',
 };
 
 function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Feature; setCurrentFeature: (f: Feature) => void }) {
@@ -116,6 +118,12 @@ function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Fea
           <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
           <Route path="/workouts/prs" element={<PRsPage />} />
           <Route path="/workouts/progress/:exerciseId" element={<ExerciseProgressPage />} />
+          <Route path="/inventory" element={<InventoryDashboard />} />
+          <Route path="/inventory/items" element={<ItemsList />} />
+          <Route path="/inventory/items/new" element={<ItemForm />} />
+          <Route path="/inventory/items/:id" element={<ItemDetailPage />} />
+          <Route path="/inventory/items/:id/edit" element={<ItemForm itemId={useParams<{ id: string }>().id} />} />
+          <Route path="/inventory/locations" element={<LocationsPage />} />
         </Routes>
       </Layout>
   );

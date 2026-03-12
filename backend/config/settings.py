@@ -9,6 +9,7 @@ ALLOWED_HOSTS = ['127.0.0.1','localhost','192.168.0.13']
 INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
+    'django_filters',
     'api',
     'weather',
     'journalapp',
@@ -19,6 +20,7 @@ INSTALLED_APPS = [
     'posts',
     'crm',
     'workouts',
+    'inventory',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
