@@ -24,4 +24,5 @@ urlpatterns = [
     path('crm/', include('crm.urls')),
     path('workouts/', include('workouts.urls')),
     path('inventory/', include('inventory.urls')),
+    path('links/', include('links.urls')),
 ]

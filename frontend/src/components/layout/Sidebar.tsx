@@ -1,6 +1,6 @@
-import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart, Flame, Wrench, BookOpen, Users, Dumbbell, Package } from 'lucide-react';
+import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart, Flame, Wrench, BookOpen, Users, Dumbbell, Package, Link as LinkIcon } from 'lucide-react';
 
-type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory';
+type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links';
 
 interface SidebarProps {
   currentFeature: Feature;
@@ -14,6 +14,7 @@ const menuItems: Array<{ id: Feature; label: string; icon: React.ReactNode }> = 
   { id: 'focus', label: 'Focus', icon: <Focus size={20} /> },
   { id: 'notes', label: 'Notes', icon: <FileText size={20} /> },
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={20} /> },
+  { id: 'links', label: 'Links', icon: <LinkIcon size={20} /> },
   { id: 'recipes', label: 'Recipes', icon: <UtensilsCrossed size={20} /> },
   { id: 'grocery', label: 'Grocery Lists', icon: <ShoppingCart size={20} /> },
   { id: 'habits', label: 'Habits', icon: <Flame size={20} /> },

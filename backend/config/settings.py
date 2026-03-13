@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'crm',
     'workouts',
     'inventory',
+    'links',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

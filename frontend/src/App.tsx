@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from './components/layout/Layout';
 import { FocusCard } from './components/FocusCard';
 import { NotesList } from './components/NotesList';
@@ -20,12 +21,15 @@ import RoutinesPage from './components/workouts/RoutinesPage';
 import WorkoutStartPage from './components/workouts/WorkoutStartPage';
 import WorkoutSessionPage from './components/workouts/WorkoutSessionPage';
 import WorkoutDetailPage from './components/workouts/WorkoutDetailPage';
-import HistoryPage as WorkoutHistoryPage from './components/workouts/HistoryPage';
+import WorkoutHistoryPage from './components/workouts/HistoryPage';
 import PRsPage from './components/workouts/PRsPage';
 import ExerciseProgressPage from './components/workouts/ExerciseProgressPage';
 import { InventoryDashboard, ItemsList, ItemForm, ItemDetailPage, LocationsPage } from './components/inventory';
+import LinksList from './components/links/LinksList';
+import ReadingQueuePage from './components/links/ReadingQueuePage';
+import ImportExportPage from './components/links/ImportExportPage';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links';
 
 const featureRoutes: Record<Feature, string> = {
   dashboard: '/',
@@ -40,6 +44,7 @@ const featureRoutes: Record<Feature, string> = {
   crm: '/crm/contacts',
   workouts: '/workouts/start',
   inventory: '/inventory',
+  links: '/links',
 };
 
 function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Feature; setCurrentFeature: (f: Feature) => void }) {
@@ -121,21 +126,28 @@ function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Fea
           <Route path="/inventory" element={<InventoryDashboard />} />
           <Route path="/inventory/items" element={<ItemsList />} />
           <Route path="/inventory/items/new" element={<ItemForm />} />
-          <Route path="/inventory/items/:id" element={<ItemDetail />} />
+          <Route path="/inventory/items/:id" element={<ItemDetailPage />} />
           <Route path="/inventory/items/:id/edit" element={<ItemForm />} />
-          <Route path="/inventory/locations" element={<LocationsList />} />
+          <Route path="/inventory/locations" element={<LocationsPage />} />
+          <Route path="/links" element={<LinksList />} />
+          <Route path="/links/queue" element={<ReadingQueuePage />} />
+          <Route path="/links/import-export" element={<ImportExportPage />} />
         </Routes>
       </Layout>
   );
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   const [currentFeature, setCurrentFeature] = useState<Feature>('dashboard');
 
   return (
-    <BrowserRouter>
-      <AppContent currentFeature={currentFeature} setCurrentFeature={setCurrentFeature} />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppContent currentFeature={currentFeature} setCurrentFeature={setCurrentFeature} />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
