@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
-type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm';
+type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links' | 'job_tracker';
 
 interface LayoutProps {
   currentFeature: Feature;

@@ -28,8 +28,9 @@ import { InventoryDashboard, ItemsList, ItemForm, ItemDetailPage, LocationsPage 
 import LinksList from './components/links/LinksList';
 import ReadingQueuePage from './components/links/ReadingQueuePage';
 import ImportExportPage from './components/links/ImportExportPage';
+import { JobTrackerDashboard, ApplicationsList, ApplicationDetail, CompaniesList } from './components/job_tracker';
 
-type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links';
+type Feature = 'focus' | 'notes' | 'tasks' | 'dashboard' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links' | 'job_tracker';
 
 const featureRoutes: Record<Feature, string> = {
   dashboard: '/',
@@ -45,6 +46,7 @@ const featureRoutes: Record<Feature, string> = {
   workouts: '/workouts/start',
   inventory: '/inventory',
   links: '/links',
+  job_tracker: '/job-tracker',
 };
 
 function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Feature; setCurrentFeature: (f: Feature) => void }) {
@@ -132,6 +134,10 @@ function AppContent({ currentFeature, setCurrentFeature }: { currentFeature: Fea
           <Route path="/links" element={<LinksList />} />
           <Route path="/links/queue" element={<ReadingQueuePage />} />
           <Route path="/links/import-export" element={<ImportExportPage />} />
+          <Route path="/job-tracker" element={<JobTrackerDashboard onNavigate={handleFeatureChange} />} />
+          <Route path="/job-tracker/applications" element={<ApplicationsList onSelectApplication={(id) => navigate(`/job-tracker/applications/${id}`)} />} />
+          <Route path="/job-tracker/applications/:id" element={<ApplicationDetail applicationId={window.location.pathname.split('/').pop() || ''} onBack={() => navigate('/job-tracker/applications')} />} />
+          <Route path="/job-tracker/companies" element={<CompaniesList />} />
         </Routes>
       </Layout>
   );

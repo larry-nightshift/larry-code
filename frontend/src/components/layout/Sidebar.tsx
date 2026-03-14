@@ -1,6 +1,6 @@
-import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart, Flame, Wrench, BookOpen, Users, Dumbbell, Package, Link as LinkIcon } from 'lucide-react';
+import { X, LayoutDashboard, Focus, FileText, CheckSquare, UtensilsCrossed, ShoppingCart, Flame, Wrench, BookOpen, Users, Dumbbell, Package, Link as LinkIcon, Briefcase } from 'lucide-react';
 
-type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links';
+type Feature = 'dashboard' | 'focus' | 'notes' | 'tasks' | 'recipes' | 'grocery' | 'habits' | 'maintenance' | 'posts' | 'crm' | 'workouts' | 'inventory' | 'links' | 'job_tracker';
 
 interface SidebarProps {
   currentFeature: Feature;
@@ -23,6 +23,7 @@ const menuItems: Array<{ id: Feature; label: string; icon: React.ReactNode }> = 
   { id: 'inventory', label: 'Inventory', icon: <Package size={20} /> },
   { id: 'posts', label: 'Posts', icon: <BookOpen size={20} /> },
   { id: 'crm', label: 'CRM', icon: <Users size={20} /> },
+  { id: 'job_tracker', label: 'Job Tracker', icon: <Briefcase size={20} /> },
 ];
 
 export function Sidebar({ currentFeature, onFeatureChange, isOpen, onClose }: SidebarProps) {
